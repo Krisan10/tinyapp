@@ -47,6 +47,14 @@ app.post("/urls", (req, res) => {
   res.redirect(`/urls/${shortURL}`);
 });
 
+app.post("/urls/:id/delete", (req, res) => { //Delete 
+  const deleteURL = req.params.id
+  if(urlDatabase.hasOwnProperty(deleteURL)){
+  delete urlDatabase[deleteURL]
+  res.redirect("/urls")
+  }
+})
+
 app.get("/u/:id", (req, res) => {
   const shortURL = req.params.id;
   const longURL = urlDatabase[shortURL];
@@ -57,13 +65,13 @@ app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
 });
 
-const generateRandomString = function() {
-  const alphanumericChars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+const generateRandomString = function() { //Random alphanumeric value for url creation
+  const numlets = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
   let result = '';
 
   for (let i = 0; i < 6; i++) {
-    const randomIndex = Math.floor(Math.random() * alphanumericChars.length);
-    result += alphanumericChars.charAt(randomIndex);
+    const randomIndex = Math.floor(Math.random() * numlets.length);
+    result += numlets.charAt(randomIndex);
   }
 
   return result;
