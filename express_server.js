@@ -1,8 +1,10 @@
+const cookieParser = require("cookie-parser");
 const express = require("express");
 const app = express();
 const PORT = 8080; // default port 8080
 
 app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser());
 app.set("view engine", "ejs");
 
 const urlDatabase = {
@@ -23,7 +25,11 @@ app.get("/urls.json", (req, res) => {
 });
 
 app.get("/urls", (req, res) => {
-  const templateVars = { urls: urlDatabase };
+  const templateVars = {
+    username: req.cookies["username"],
+    urls: urlDatabase 
+  };
+ 
   res.render("urls_index", templateVars);
 });
 
@@ -77,14 +83,16 @@ app.post("/login", (req, res) => {
   // Retrieve username from the request body
   const username = req.body.username;
   // Redirect or respond based on authentication result
-  if (username === "vanillaice") {
+ 
     res.cookie("username", username);
     // Successful authentication
     res.redirect("/urls"); 
-  } else {
-    // Failed authentication
-    res.status(401).send("Authentication failed"); 
-  }
+});
+
+app.post("/logout", (req, res) => {
+  // Clear the username cookie to log out the user
+  res.clearCookie("username");
+  res.redirect("/urls");
 });
 
 app.get("/u/:id", (req, res) => {
