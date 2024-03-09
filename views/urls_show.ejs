@@ -11,7 +11,7 @@
     <title>URL - TinyApp Example</title>
   </head>
 
-  <body> 
+  <body>
     <%- include('partials/_header') %>
     <div class="card text-center">
       <div class="card-header"></div>
@@ -19,6 +19,21 @@
         <h5 class="card-title">TinyURL for: <%= longURL %></h5>
         <p class="card-text">
           Short URL ID: <a href="/u/<%= id %>"><%= id %></a>
+          <!-- Form for updating the long URL -->
+          <form action="/urls/<%= id %>/update" method="post">
+            <div class="form-group">
+              <label for="newLongURL">Update URL:</label>
+              <input
+                type="text"
+                class="form-control"
+                id="newLongURL"
+                name="newLongURL"
+                placeholder="New URL"
+                value="<%= longURL %>"
+              />
+            </div>
+            <button type="submit" class="btn btn-primary">Update</button>
+          </form>
         </p>
       </div>
       <div class="card-footer text-muted"></div>
