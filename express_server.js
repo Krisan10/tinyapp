@@ -31,8 +31,14 @@ app.get("/urls/new", (req, res) => {
   res.render("urls_new");
 });
 
+
 app.get("/urls/:id", (req, res) => {
   const templateVars = { id: req.params.id, longURL: urlDatabase };
+  res.render("urls_show", templateVars);
+});
+
+app.get("/urls/:id/update", (req, res) => {
+  const templateVars = { id: req.params.id, longURL: urlDatabase[req.params.id] };
   res.render("urls_show", templateVars);
 });
 
@@ -54,6 +60,18 @@ app.post("/urls/:id/delete", (req, res) => { //Delete
   res.redirect("/urls")
   }
 })
+
+app.post("/urls/:id/update", (req, res) => {
+  const updateURL = req.params.id;
+  const newLongURL = req.body.newLongURL;
+
+  if (urlDatabase.hasOwnProperty(updateURL)) {
+    urlDatabase[updateURL] = newLongURL;
+    res.redirect(`/urls`);
+  } else {
+    res.status(404).send("URL not found");
+  }
+});
 
 app.get("/u/:id", (req, res) => {
   const shortURL = req.params.id;
