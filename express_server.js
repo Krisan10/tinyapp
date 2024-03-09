@@ -73,6 +73,20 @@ app.post("/urls/:id/update", (req, res) => {
   }
 });
 
+app.post("/login", (req, res) => {
+  // Retrieve username from the request body
+  const username = req.body.username;
+  // Redirect or respond based on authentication result
+  if (username === "vanillaice") {
+    res.cookie("username", username);
+    // Successful authentication
+    res.redirect("/urls"); 
+  } else {
+    // Failed authentication
+    res.status(401).send("Authentication failed"); 
+  }
+});
+
 app.get("/u/:id", (req, res) => {
   const shortURL = req.params.id;
   const longURL = urlDatabase[shortURL];
