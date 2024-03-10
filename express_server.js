@@ -2,15 +2,34 @@ const cookieParser = require("cookie-parser");
 const express = require("express");
 const app = express();
 const PORT = 8080; // default port 8080
+const bcrypt = require('bcrypt');
+
+const { findUserByEmail, authenticateUser, randomString} = require("./functions")
+
+const saltRounds = 10;
 
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.set('view engine', 'ejs');
 
+const users = {
+  userRandomID: {
+    id: "userRandomID",
+    email: "user@example.com",
+    password: "purple-monkey-dinosaur",
+  },
+  user2RandomID: {
+    id: "user2RandomID",
+    email: "user2@example.com",
+    password: "dishwasher-funk",
+  },
+};
+
 const urlDatabase = {
   "b2xVn2": "http://www.lighthouselabs.ca",
   "9sm5xK": "http://www.google.com"
 };
+
 // GET
 app.get("/", (req, res) => {
   res.send("Hello!");
@@ -134,15 +153,18 @@ app.post("/register", (req, res) => {
   const password = req.body.password;
 
   // Check if the email is already registered
-  if (findUserByEmail(email)) {
+  if (findUserByEmail(users, email)) {
     res.status(400).send("Email already registered");
     return;
   }
 
+  // Hash the password before storing
+  const hashedPassword = bcrypt.hashSync(password, saltRounds);
+
   const newUser = {
     id: email,
     email: email,
-    password: password,
+    password: hashedPassword,
   };
 
   users[email] = newUser;
@@ -156,54 +178,7 @@ app.post("/logout", (req, res) => {
   res.redirect("/login");
 });
 
-
-const authenticateUser = function (email, password) {
-  const user = findUserByEmail(email);
-
-  if (user && user.password === password) {
-    return user;
-  }
-
-  return null;
-};
-
-
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
 });
 
-const randomString = function() { //Random alphanumeric value for url creation
-  const numlets = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-  let result = '';
-
-  for (let i = 0; i < 6; i++) {
-    const randomIndex = Math.floor(Math.random() * numlets.length);
-    result += numlets.charAt(randomIndex);
-  }
-
-  return result;
-};
-const users = {
-  userRandomID: {
-    id: "userRandomID",
-    email: "user@example.com",
-    password: "purple-monkey-dinosaur",
-  },
-  user2RandomID: {
-    id: "user2RandomID",
-    email: "user2@example.com",
-    password: "dishwasher-funk",
-  },
-};
-
-const findUserByEmail = function (email) {
-  for (const userId in users) {
-    if (users[userId] && users[userId].hasOwnProperty && typeof users[userId].hasOwnProperty === 'function') {
-      const user = users[userId];
-      if (user.email === email) {
-        return user;
-      }
-    }
-  }
-  return null;
-};
