@@ -11,10 +11,10 @@
         <a class="nav-item nav-link" href="/urls/new">Create New URL</a>
       </div>
       </div>
-      <% if (username) { %>
-        <!-- Display the username and logout button when logged in -->
+      <% if (user_id) { %>
+        <!-- Display the user_id and logout button when logged in -->
         <span class="navbar-text">
-          Welcome, <%= username %>!
+          Welcome, <%= user_id %>!
         </span>
         <form class="form-inline my-2 my-md-0" action="/logout" method="post">
           <button class="btn btn-outline-light my-2 my-sm-0" type="submit">Logout</button>
