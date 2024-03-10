@@ -39,31 +39,49 @@ app.get("/hello", (req, res) => {
   res.send("<html><body>Hello <b>World</b></body></html>\n");
 });
 
-app.get("/urls.json", (req, res) => {
-  res.json(urlDatabase);
-});
-
 app.get("/urls", (req, res) => {
+  const userId = req.cookies["user_id"];
+
+  // Check if the user is logged in
+  if (!userId) {
+    res.redirect("/login");
+    return;
+  }
+
   const templateVars = {
-    user_id: req.cookies["user_id"],
+    user_id: userId,
     urls: urlDatabase
   };
- 
+
   res.render("urls_index", templateVars);
 });
 
 app.get("/urls/new", (req, res) => {
+  // Check if the user is not logged in
+  if (!req.cookies["user_id"]) {
+    res.redirect("/login");
+    return;
+  }
+
   const templateVars = {
     user_id: req.cookies["user_id"] || null,
   };
   res.render("urls_new", templateVars);
 });
 
-app.get("/urls/:id", (req, res) => {
+app.get("/u/:id", (req, res) => {
   const shortURL = req.params.id;
   const longURL = urlDatabase[shortURL];
-  const templateVars = { id: shortURL, longURL: longURL, user_id: req.cookies["user_id"] };
-  res.render("urls_show", templateVars);
+
+  if (longURL) {
+    res.redirect(longURL);
+  } else {
+    const templateVars = {
+      user_id: req.cookies["user_id"] || null,
+      errorMessage: "URL not found",
+    };
+    res.status(404).render("error", templateVars);
+  }
 });
 
 app.get("/urls/:id/update", (req, res) => {
@@ -74,36 +92,46 @@ app.get("/urls/:id/update", (req, res) => {
   res.render("urls_show", templateVars);
 });
 
-app.get("/register", (req, res) => {
-  const templateVars = {
-    user_id: req.cookies["user_id"] || null,
-  };
-  res.render("register", templateVars);
-});
-
 app.get("/login", (req, res) => {
+  // Check if the user is already logged in
+  if (req.cookies["user_id"]) {
+    res.redirect("/urls");
+    return;
+  }
+
   const templateVars = {
     user_id: req.cookies["user_id"] || null,
   };
   res.render("login", templateVars);
 });
 
-app.get("/:id", (req, res) => {
-  const shortURL = req.params.id;
-  const longURL = urlDatabase[shortURL];
-  res.redirect(longURL);
+app.get("/register", (req, res) => {
+  // Check if the user is already logged in
+  if (req.cookies["user_id"]) {
+    res.redirect("/urls");
+    return;
+  }
+  const templateVars = {
+    user_id: req.cookies["user_id"] || null,
+  };
+  res.render("register", templateVars);
 });
 
 //Post
 
 app.post("/urls", (req, res) => {
+  // Check if the user is not logged in
+  if (!req.cookies["user_id"]) {
+    res.status(403).send("You must be logged in to shorten URLs.");
+    return;
+  }
+
   const shortURL = randomString();
   const longURL = req.body.longURL;
-  
-  // Save the key-value pair in the urlDatabase
+
+  // Add the URL to the database only if the user is logged in
   urlDatabase[shortURL] = longURL;
 
-  // Redirect to the /urls/:id page for the newly created shortURL
   res.redirect(`/urls/${shortURL}`);
 });
 
@@ -152,13 +180,12 @@ app.post("/register", (req, res) => {
   const email = req.body.email;
   const password = req.body.password;
 
-  // Check if the email is already registered
   if (findUserByEmail(users, email)) {
+    console.log("Email already registered");
     res.status(400).send("Email already registered");
     return;
   }
 
-  // Hash the password before storing
   const hashedPassword = bcrypt.hashSync(password, saltRounds);
 
   const newUser = {
@@ -168,14 +195,26 @@ app.post("/register", (req, res) => {
   };
 
   users[email] = newUser;
+  console.log("User registered successfully");
   res.cookie("user_id", email);
   res.redirect("/urls");
-});
+})
 
 // Logout handler
 app.post("/logout", (req, res) => {
   res.clearCookie("user_id");
   res.redirect("/login");
+});
+
+app.get("/urls/:id", (req, res) => {
+  const shortURL = req.params.id;
+  const longURL = urlDatabase[shortURL];
+
+  if (longURL) {
+    res.redirect(longURL);
+  } else {
+    res.status(404).send("URL not found");
+  }
 });
 
 app.listen(PORT, () => {
