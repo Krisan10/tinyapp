@@ -113,30 +113,22 @@ app.post("/urls/:id/update", (req, res) => {
   }
 });
 
-app.post("/logout", (req, res) => {
-  res.clearCookie("user_id"); 
-  res.redirect("/login");
-});
-
 app.post("/login", (req, res) => {
   const email = req.body.email;
   const password = req.body.password;
 
-  const user = findUserByEmail(email);
+  const user = authenticateUser(email, password);
 
   if (!user) {
-    res.status(403).send("User not found");
+    res.status(403).send("Invalid email or password");
     return;
   }
-  // Check if the password matches
-  if (user.password !== password) {
-    res.status(403).send("Incorrect password");
-    return;
-  }
+
   res.cookie("user_id", user.id);
   res.redirect("/urls");
 });
 
+// Register handler
 app.post("/register", (req, res) => {
   const email = req.body.email;
   const password = req.body.password;
@@ -157,6 +149,24 @@ app.post("/register", (req, res) => {
   res.cookie("user_id", email);
   res.redirect("/urls");
 });
+
+// Logout handler
+app.post("/logout", (req, res) => {
+  res.clearCookie("user_id");
+  res.redirect("/login");
+});
+
+
+const authenticateUser = function (email, password) {
+  const user = findUserByEmail(email);
+
+  if (user && user.password === password) {
+    return user;
+  }
+
+  return null;
+};
+
 
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
