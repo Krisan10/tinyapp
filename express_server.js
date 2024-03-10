@@ -57,7 +57,7 @@ app.get("/urls/:id/update", (req, res) => {
 
 app.get("/register", (req, res) => {
   const templateVars = {
-    username: null, 
+    username: req.cookies["username"] || null,
   };
   res.render("register", templateVars);
 });
