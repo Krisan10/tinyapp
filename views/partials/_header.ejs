@@ -1,24 +1,39 @@
-<nav class="navbar navbar-expand-lg navbar-light bg-light">
-  <a class="navbar-brand" href="/">TinyApp</a>
-
-  <div class="collapse navbar-collapse" id="navbarNav">
-    <ul class="navbar-nav ml-auto">
-      <% if (!username) { %>
-        <!-- Display Register and Login links for users not logged in -->
-        <li class="nav-item">
-          <a class="nav-link" href="/register">Register</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="/login">Login</a>
-        </li>
+<header>
+  <nav class="navbar navbar-expand-md navbar-dark bg-success">
+    <a class="navbar-brand" href="/urls">TinyApp</a>
+    <button
+      class="navbar-toggler"
+      type="button"
+      data-toggle="collapse"
+      data-target="#navbarNavAltMarkup"
+      aria-controls="navbarNavAltMarkup"
+      aria-expanded="false"
+      aria-label="Toggle navigation"
+    >
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
+      <div class="navbar-nav">
+        <a class="nav-item nav-link" href="/urls">My URLs</a>
+        <a class="nav-item nav-link" href="/urls/new">Create New URL</a>
+      </div>
+      </div>
+      <% if (username) { %>
+        <!-- Display the username and logout button when logged in -->
+        <span class="navbar-text">
+          Welcome, <%= username %>!
+        </span>
+    
+        <form class="form-inline my-2 my-lg-0" action="/logout" method="post">
+          <button class="btn btn-outline-light my-2 my-sm-0" type="submit">Logout</button>
+        </form>
       <% } else { %>
-        <!-- Display Logout button for logged-in users -->
-        <li class="nav-item">
-          <form action="/logout" method="POST">
-            <button type="submit" class="btn btn-link nav-link">Logout</button>
-          </form>
-        </li>
+        <!-- Display the login form when not logged in -->
+        <form class="form-inline my-2 my-lg-0" action="/login" method="post">
+          <input class="form-control mr-sm-2" type="text" placeholder="Username" name="username">
+          <button class="btn btn-outline-light my-2 my-sm-0" type="submit">Login</button>
+        </form>
       <% } %>
-    </ul>
-  </div>
-</nav>
+    </div>
+  </nav>
+</header>
