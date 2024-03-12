@@ -36,16 +36,6 @@ const findUserByEmail = function (users, email) {
   return null;
 };
 
-const findEmailByUser = function (users, userID) {
-  for (const user in users) {
-    const user = users[userID];
-    if(user.userID === userID) {
-      return user
-    }
-  }
-  return null;
-}
-
 
 const authenticateUser = function(user){
   !!user;
@@ -82,6 +72,5 @@ module.exports = {
   authenticateUser,
   randomString,
   urlsForUser,
-  findEmailByUser
 };
 
