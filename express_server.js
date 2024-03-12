@@ -4,7 +4,7 @@ const bcrypt = require("bcryptjs");
 
 const PORT = 8080; // default port 8080
 
-const { findUserByEmail, authenticateUser, randomString, urlsForUser} = require("./functions")
+const { findUserByEmail, authenticateUser, randomString, urlsForUser, findEmailByUser} = require("./functions")
 
 const app = express();
 app.set('view engine', 'ejs');
@@ -21,6 +21,7 @@ app.use(cookieSession({
 const users = {};
 
 const urlDatabase = {};
+
 
 
 // GET
@@ -81,6 +82,7 @@ app.get("/u/:id", (req, res) => {
     const templateVars = {
       user_id: req.session["user_id"] || null,
       errorMessage: "URL not found",
+      id: shortURL, 
     };
     res.status(404).render("error", templateVars);
   }
@@ -89,7 +91,7 @@ app.get("/u/:id", (req, res) => {
 app.get("/urls/:id/update", (req, res) => {
   const shortURL = req.params.id;
   const userId = req.session["user_id"];
-  const url = urlDatabase[shortURL]; // Use shortURL here
+  const url = urlDatabase[shortURL]; 
 
   // Check if the user is logged in
   if (!userId) {
@@ -150,8 +152,9 @@ app.get("/register", (req, res) => {
 
 app.get("/urls/:id", (req, res) => {
   const shortURL = req.params.id;
-  const longURL = urlDatabase[shortURL];
-
+  const {longURL} = urlDatabase[shortURL];
+console.log("shortUrl", shortURL)
+console.log("Database", urlDatabase)
   if (longURL) {
     res.redirect(longURL);
   } else {
@@ -219,6 +222,8 @@ app.post("/urls/:id/update", (req, res) => {
   }
 
   const url = urlDatabase[shortURL];
+  console.log("update router", url)
+  console.log("url database", urlDatabase )
 
   // Check if the URL exists
   if (!url) {
@@ -232,7 +237,7 @@ app.post("/urls/:id/update", (req, res) => {
 
   // Update the URL with the new longURL
   urlDatabase[shortURL].longURL = newLongURL;
-  res.redirect(`/urls/${shortURL}`);
+  res.redirect(`/urls`);
 });
 
 // Login Handler
