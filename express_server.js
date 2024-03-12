@@ -4,7 +4,7 @@ const bcrypt = require("bcryptjs");
 
 const PORT = 8080; // default port 8080
 
-const { findUserByEmail, authenticateUser, randomString, urlsForUser, } = require("./functions")
+const { findUserByEmail, authenticateUser, randomString, urlsForUser, urlBelongsToUser, requireLogin, requireOwnership} = require("./helpers")
 
 const app = express();
 app.set('view engine', 'ejs');
@@ -47,7 +47,7 @@ app.get("/urls", (req, res) => {
   }
 
   const templateVars = {
-    user_id: userId,
+    user_id: users.email,
     urls: urlDatabase, // Pass the entire urlDatabase
   };
 
@@ -88,25 +88,10 @@ app.get("/u/:id", (req, res) => {
   }
 });
 
-app.get("/urls/:id/update", (req, res) => {
+app.get("/urls/:id/update", requireLogin, requireOwnership(urlDatabase), (req, res) => {
   const shortURL = req.params.id;
   const userId = req.session["user_id"];
-  const url = urlDatabase[shortURL]; 
-
-  // Check if the user is logged in
-  if (!userId) {
-    return res.status(403).send("You must be logged in to edit URLs.");
-  }
-
-  // Check if the URL exists
-  if (!url) {
-    return res.status(404).send("URL not found");
-  }
-
-  // Check if the logged-in user is the owner of the URL
-  if (url.userID !== userId && url.userID !== "") {
-    return res.status(403).send("You cannot edit this URL.");
-  }
+  const url = urlDatabase[shortURL];
 
   const templateVars = {
     shortURL: shortURL,
@@ -116,6 +101,7 @@ app.get("/urls/:id/update", (req, res) => {
 
   res.render("urls_show", templateVars);
 });
+
 
 app.get("/login", (req, res) => {
   const newUserId = req.session.user_id;
@@ -153,8 +139,6 @@ app.get("/register", (req, res) => {
 app.get("/urls/:id", (req, res) => {
   const shortURL = req.params.id;
   const {longURL} = urlDatabase[shortURL];
-console.log("shortUrl", shortURL)
-console.log("Database", urlDatabase)
   if (longURL) {
     res.redirect(longURL);
   } else {
@@ -201,7 +185,7 @@ app.post("/urls/:id/delete", (req, res) => {
   }
 
   // Check if the logged-in user is the owner of the URL
-  if (url.userID !== userId) {
+  if (urlBelongsToUser(userID)) {
     return res.status(403).send("Unable to delete this URL without proper permission.");
   }
 
@@ -222,8 +206,6 @@ app.post("/urls/:id/update", (req, res) => {
   }
 
   const url = urlDatabase[shortURL];
-  console.log("update router", url)
-  console.log("url database", urlDatabase )
 
   // Check if the URL exists
   if (!url) {
