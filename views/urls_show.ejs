@@ -18,9 +18,9 @@
       <div class="card-body">
         <h5 class="card-title">TinyURL for: <%= longURL %></h5>
         <p class="card-text">
-          Short URL ID: <a href="/u/<%= id %>"><%= id %></a>
+          Short URL ID: <a href="/u/<%= shortURL %>"><%= shortURL %></a>
           <!-- Form for updating the long URL -->
-          <form action="/urls/<%= id %>/update" method="post">
+          <form action="/urls/<%= shortURL %>/update" method="post">
             <div class="form-group">
               <label for="newLongURL">Update URL:</label>
               <input
