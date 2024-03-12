@@ -4,7 +4,7 @@ const bcrypt = require("bcryptjs");
 
 const PORT = 8080; // default port 8080
 
-const { findUserByEmail, authenticateUser, randomString, urlsForUser, findEmailByUser} = require("./functions")
+const { findUserByEmail, authenticateUser, randomString, urlsForUser, } = require("./functions")
 
 const app = express();
 app.set('view engine', 'ejs');
