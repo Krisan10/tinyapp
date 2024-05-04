@@ -18,12 +18,11 @@
         <a class="nav-item nav-link" href="/urls/new">Create New URL</a>
       </div>
     </div>
-  </div>
-  <% if (username) { %>
-    <span class="navbar-text ml-auto">Logged in as <%= username %></span>
-  <% } %>
-  </div>
-
-  
+    <% if (userID) { %>
+      <span class="navbar-text ml-auto">Logged in as <%= userID %></span>
+      <div>
+        <a class="btn btn-warning" href="/logout">Logout</a>
+      </div>
+    <% } %>
   </nav>
 </header>
