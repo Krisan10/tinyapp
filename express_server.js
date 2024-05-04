@@ -33,7 +33,7 @@ app.get("/urls", (req, res) => {
   const user = users[userId];
 
 
-  const templateVars = { urls: urlDatabase, username: username }; 
+  const templateVars = { urls: urlDatabase, user }; 
   res.render("urls_index", templateVars);
 });;
 
