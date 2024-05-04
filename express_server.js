@@ -62,7 +62,7 @@ app.post("/login", (req, res) => {
   const loggedPassword = req.body.password;
 
   const oldUser = getUserByEmail(email, users)
-  if(!oldUser || bcrypt.compareSync(loggedPassword, oldUser.password)){
+  if(!oldUser || !bcrypt.compareSync(loggedPassword, oldUser.password)){
     res.status(403).send("Username and/or password does not match")
   } else {
     req.session.user_id = oldUser.id;
