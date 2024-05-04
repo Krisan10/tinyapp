@@ -4,17 +4,17 @@ const PORT = 8080; // default port 8080
 
 app.set("view engine", "ejs");
 app.use(express.urlencoded({ extended: true }));
+app.use(express.json());
+app.use(cookieSession({
+  name: 'session',
+  keys: ['key1', 'key2']
+}));
 
 const cookieSession = require('cookie-session')
 const bcrypt = require("bcryptjs");
 
 const {randomNumberGenerator, getUserByEmail} = require('./helpers')
 const {users, urlDatabase} = require('./databases');
-
-app.use(cookieSession({
-  name: 'session',
-  keys: ['key1', 'key2']
-}));
 
 
 app.get("/", (req, res) => {
@@ -32,13 +32,20 @@ app.get("/urls", (req, res) => {
   const user = users[userId];
 
 
-  const templateVars = { urls: urlDatabase, user }; 
+  const templateVars = { urls: urlDatabase, user, userID:userId }; 
   res.render("urls_index", templateVars);
 });;
 
 //New URL
 app.get("/urls/new", (req, res) => {
-  res.render("urls_new");
+  const userId = req.session.user_id;
+  //check if user is logged in
+  if (!userId) {
+    return res.status(401).send('You must be logged in to access this page.');
+  }
+ 
+  const templateVars = {userID:userId }; 
+  res.render("urls_new", templateVars);
 });
 
 //Url Individual Page
@@ -48,7 +55,11 @@ app.get("/urls/:id", (req, res) => {
   const longURL = urlDatabase[shortenURL];
   const user = users[userId];
 
-  const templateVars ={ longURL: longURL, id: shortenURL, user }
+  if(!userId){
+    res.redirect(longURL)
+  }
+
+  const templateVars ={ longURL: longURL, id: shortenURL, user, userID: userId }
 
   res.render("urls_show", templateVars)
 });
@@ -113,13 +124,19 @@ res.redirect("/login");
 
 //create new URL
 app.post("/urls", (req, res) => {
+  const userId = req.session.user_id;
+  //check if user is logged in
+  if (!userId) {
+    return res.status(401).send('You must be logged in to access this page.');
+  }
+
   const shortURL = randomNumberGenerator();
   const longURL = req.body.longURL
 
   // This stores the longURL into the urlDatabase as a value for the shortURL
   urlDatabase[shortURL] = longURL
   
-  res.redirect(`/urls/`);
+  res.redirect(`/urls`);
 });
 
 //delete
@@ -131,6 +148,10 @@ app.post("/urls/:id/delete", (req, res) => {
 })
 
 //logout
+app.get("/logout", (rq, res) => {
+  res.redirect('/login')
+})
+
 app.post("/logout", (req, res) => {
   req.session = null; 
   res.redirect("/login");
