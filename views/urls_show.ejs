@@ -1,3 +1,5 @@
+<!--Page for individual URLs-->
+
 <!DOCTYPE html>
 <html lang="en">
   <head>
@@ -16,25 +18,25 @@
     <div class="card text-center">
       <div class="card-header"></div>
       <div class="card-body">
-        <h5 class="card-title">TinyURL for: <%= longURL %></h5>
+        <h5 class="card-title">TinyURL: <%= id %></h5>
         <p class="card-text">
-          Short URL ID: <a href="/u/<%= shortURL %>"><%= shortURL %></a>
-          <!-- Form for updating the long URL -->
-          <form action="/urls/<%= shortURL %>/update" method="post">
-            <div class="form-group">
-              <label for="newLongURL">Update URL:</label>
-              <input
-                type="text"
-                class="form-control"
-                id="newLongURL"
-                name="newLongURL"
-                placeholder="New URL"
-                value="<%= longURL %>"
-              />
-            </div>
-            <button type="submit" class="btn btn-primary">Update</button>
-          </form>
+          Long URL: <%= longURL %>
         </p>
+      </div>
+      <form action="/urls/<%= id %>" method="POST" class="d-flex justify-content-center">
+        <div class="form-group">
+          <label for="update">Update URL:</label>
+          <input
+            class="form-control"
+            type="text"
+            name="longURL" 
+            placeholder="http://"
+            style="width: 500px;"
+          />
+          <button type="submit" class="btn btn-primary">Submit</button>
+        </div>
+      </form>
+          
       </div>
       <div class="card-footer text-muted"></div>
     </div>

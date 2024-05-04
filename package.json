@@ -1,31 +1,19 @@
 {
-  "name": "tinyapp",
+  "name": "newapp",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "express_server.js",
   "scripts": {
-    "start": "./node_modules/.bin/nodemon -L express_server.js",
     "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/Krisan10/tinyapp.git"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/Krisan10/tinyapp/issues"
-  },
-  "homepage": "https://github.com/Krisan10/tinyapp#readme",
   "dependencies": {
     "bcryptjs": "^2.4.3",
     "cookie-session": "^2.1.0",
-    "ejs": "^3.1.9",
-    "express": "^4.18.3",
-    "express-session": "^1.18.0"
-  },
-  "devDependencies": {
+    "ejs": "^3.1.10",
+    "express": "^4.19.2",
     "nodemon": "^3.1.0"
   }
 }

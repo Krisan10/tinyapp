@@ -1,6 +1,14 @@
+<!--page for user URLs -->
+
 <!DOCTYPE html>
 <html lang="en">
   <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, shrink-to-fit=no"
+    />
+
     <!-- Bootstrap CSS -->
     <link
       rel="stylesheet"
@@ -8,7 +16,7 @@
       integrity="sha384-GJzZqFGwb1QTTN6wy59ffF1BuGJpLSa9DkKMp0DgiMDm4iYMj70gZWKYbI706tWS"
       crossorigin="anonymous"
     />
-    <title>TinyApp</title>
+    <title>TinyApp</title> <!--Title of tab-->
   </head>
   <body>
     <%- include('partials/_header') %>
@@ -19,25 +27,30 @@
           <tr>
             <th scope="col">Short URL ID</th>
             <th scope="col">Long URL</th>
-            <th scope="col">Delete</th>
-            <th scope="col">Update</th>
+            <th scope="col" class="text-center">Update</th>
+            <th scope="col" class="text-right">Delete</th>
           </tr>
         </thead>
         <tbody>
           <% for (let id in urls) { %>
             <tr>
               <td><%= id %></td>
-              <td><a href="<%= urls[id].longURL %>"><%= urls[id].longURL %></a></td> <!-- Access longURL property -->
-              <td>
-                <form method="POST" action="/urls/<%= id %>/delete">
-                  <button type="submit" class="btn btn-danger">Delete</button>
-                </form>
-              </td>
-              <td>
-                <form action="/urls/<%= id %>/update" method="get">
-                  <button type="submit" class="btn btn-primary">Update</button>
-                </form>
-              </td>
+              <td><%= urls[id] %></td>
+            </td>
+            <td class="text-center">
+              <!-- Form for updating the URL -->
+              <form method="GET" action="/urls/<%= id %>" style="display: inline;">
+                <button type="submit" class="btn btn-primary mr-1">Update</button>
+              </form>              
+            </td>
+            <!-- Form for deleting the URL -->
+            <td class="text-right">
+              <form method="POST" action="/urls/<%= id %>/delete" style="display: inline;">
+                <button type="submit" class="btn btn-danger">Delete</button>
+              </form>
+            </td>
+            
+            </td>
             </tr>
           <% } %>
         </tbody>

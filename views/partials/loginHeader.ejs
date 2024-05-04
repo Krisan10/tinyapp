@@ -1,0 +1,28 @@
+<header>
+  <nav class="navbar navbar-expand-md navbar-dark bg-success">
+    <a class="navbar-brand" href="/urls">TinyApp</a>
+    <button
+      class="navbar-toggler"
+      type="button"
+      data-toggle="collapse"
+      data-target="#navbarNavAltMarkup"
+      aria-controls="navbarNavAltMarkup"
+      aria-expanded="false"
+      aria-label="Toggle navigation"
+    >
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <% if (req.originalUrl !== '/login') { %>
+      <!--Login handler-->
+      <form class="form-inline ml-auto" action="/login" method="POST">
+        <div class="form-group">
+          <input type="email" class="form-control mr-2" id="email" name="email" placeholder="Email" required>
+          <input type="password" class="form-control mr-2" id="password" name="password" placeholder="Password" required>
+          <button type="submit" class="btn btn-light">Login</button>
+        </div>
+      </form>
+    <% } else { %>
+      <!-- Conditional content for login page if needed -->
+    <% } %>
+  </nav>
+</header>
