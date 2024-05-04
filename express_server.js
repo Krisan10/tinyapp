@@ -44,9 +44,12 @@ app.get("/urls/new", (req, res) => {
 
 //Url Individual Page
 app.get("/urls/:id", (req, res) => {
+  const userId = req.session.user_id;
   const shortenURL = req.params.id; 
   const longURL = urlDatabase[shortenURL];
-  const templateVars ={ longURL: longURL, id: shortenURL }
+  const user = users[userId];
+
+  const templateVars ={ longURL: longURL, id: shortenURL, user }
 
   res.render("urls_show", templateVars)
 });
@@ -61,9 +64,11 @@ app.post("/login", (req, res) => {
   const email = req.body.email;
   const loggedPassword = req.body.password;
 
-  const oldUser = getUserByEmail(email, users)
-  if(!oldUser || !bcrypt.compareSync(loggedPassword, oldUser.password)){
-    res.status(403).send("Username and/or password does not match")
+  const oldUser = getUserByEmail(email, users);
+  if (!oldUser || !bcrypt.compareSync(loggedPassword, oldUser.password)) {
+    // Clear session data on failed login attempt
+    req.session.user_id = null;
+    res.status(403).send("Username and/or password does not match");
   } else {
     req.session.user_id = oldUser.id;
     res.redirect("/urls");
