@@ -10,7 +10,6 @@ const bcrypt = require("bcryptjs");
 
 const {randomNumberGenerator, getUserByEmail} = require('./helpers')
 const {users, urlDatabase} = require('./databases');
-const e = require("express");
 
 app.use(cookieSession({
   name: 'session',
