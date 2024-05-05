@@ -1,5 +1,5 @@
 const urlDatabase = {
-  b2xVn2: "http://www.lighthouselabs.ca",
+  b2xVn2: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
   s9m5xK: "http://www.google.com"
 };
 
