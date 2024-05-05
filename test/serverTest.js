@@ -20,17 +20,17 @@ describe("Login and Access Control Test", () => {
   });
 
   it('should redirect to "/login" for access to "http://localhost:8080/urls" without logging in', () => {
-  return chai.request("http://localhost:8080")
-    .get("/urls") // Make sure this matches the path you're testing
-    .redirects(0) // Prevent chai-http from following redirects
-    .then((res) => {
-      expect(res).to.have.status(302); // Check for the redirect status code
-      expect(res.header.location).to.include('/login'); // Check the Location header
-    });
-});
+    return chai.request("http://localhost:8080")
+      .get("/urls") // Make sure this matches the path you're testing
+      .redirects(0) // Prevent chai-http from following redirects
+      .then((res) => {
+        expect(res).to.have.status(302); // Check for the redirect status code
+        expect(res.header.location).to.include('/login'); // Check the Location header
+      });
+  });
 
   it('should redirect GET /urls/new to /login with status 302', () => {
-    const agent = chai.request.agent("http://localhost:8080")
+    const agent = chai.request.agent("http://localhost:8080");
     return agent
       .get('/urls/new')
       .then((res) => {

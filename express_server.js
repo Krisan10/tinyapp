@@ -7,23 +7,23 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
 
-const cookieSession = require('cookie-session')
+const cookieSession = require('cookie-session');
 app.use(cookieSession({
   name: 'session',
   keys: ['key1', 'key2']
 }));
 const bcrypt = require("bcryptjs");
 
-const {randomNumberGenerator, getUserByEmail} = require('./helpers')
+const {randomNumberGenerator, getUserByEmail} = require('./helpers');
 const {users, urlDatabase} = require('./databases');
 
 
 app.get("/", (req, res) => {
   const user = req.session.user_id;
-  if (user) {   
+  if (user) {
     return res.redirect("/login");
   }
-  return res.redirect("/urls"); 
+  return res.redirect("/urls");
 });
 
 //Main page
@@ -36,7 +36,7 @@ app.get("/urls/new", (req, res) => {
     return res.status(302).redirect('/login');
   }
  
-  const templateVars = { userID: userId }; 
+  const templateVars = { userID: userId };
   res.render("urls_new", templateVars);
 });
 
@@ -64,11 +64,11 @@ app.get("/urls/:id", (req, res) => {
 //login page
 app.get("/login", (req, res) => {
   const user = req.session.user_id;
-  if (user) {   
+  if (user) {
     return res.redirect("/urls");
   }
 
-  const templateVars = { req: req}
+  const templateVars = { req: req};
   res.render("login", templateVars);
 });
 
@@ -89,39 +89,39 @@ app.post("/login", (req, res) => {
 
 //register page
 app.get("/register", (req, res) => {
-  const templateVars = { req: req}
+  const templateVars = { req: req};
   res.render("register", templateVars);
 });
 
 app.post("/register", (req, res) => {
-const email = req.body.email;
-const password = req.body.password;
+  const email = req.body.email;
+  const password = req.body.password;
 
-if(!email || ! password){
-  res.status(400).send('Please fill in email and password');
-  return;
-};
+  if (!email || ! password) {
+    res.status(400).send('Please fill in email and password');
+    return;
+  }
 
-const oldUser = getUserByEmail(email, users) //uses email to see if email is in database already
+  const oldUser = getUserByEmail(email, users); //uses email to see if email is in database already
 
-if(oldUser){
-  res.status(400).send('email is already in use')
-  return;
-}
+  if (oldUser) {
+    res.status(400).send('email is already in use');
+    return;
+  }
 
-const userID = randomNumberGenerator();
-const hashedpassword = bcrypt.hashSync(password, 10);
+  const userID = randomNumberGenerator();
+  const hashedpassword = bcrypt.hashSync(password, 10);
 
-users[userID] = {
-  id: userID,
-  email,
-  password: hashedpassword  
-};
+  users[userID] = {
+    id: userID,
+    email,
+    password: hashedpassword
+  };
 
-req.session.user_id = userID;
+  req.session.user_id = userID;
 
-res.redirect("/login");
-})
+  res.redirect("/login");
+});
 
 
 //create new URL
@@ -135,7 +135,7 @@ app.get("/urls", (req, res) => {
   const user = users[userId];
 
 
-  const templateVars = { urls: urlDatabase, user, userID:userId }; 
+  const templateVars = { urls: urlDatabase, user, userID:userId };
   res.render("urls_index", templateVars);
 });
 
@@ -147,10 +147,10 @@ app.post("/urls", (req, res) => {
   }
 
   const shortURL = randomNumberGenerator();
-  const longURL = req.body.longURL
+  const longURL = req.body.longURL;
 
   // This stores the longURL into the urlDatabase as a value for the shortURL
-  urlDatabase[shortURL] = longURL
+  urlDatabase[shortURL] = longURL;
   
   res.redirect(`/urls`);
 });
@@ -160,8 +160,8 @@ app.post("/urls/:id/delete", (req, res) => {
   const shortURL = req.params.id;
 
   delete urlDatabase[shortURL];
-  res.redirect('/urls')
-})
+  res.redirect('/urls');
+});
 
 //logout
 app.get("/logout", (req, res) => {
