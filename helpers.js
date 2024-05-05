@@ -17,7 +17,7 @@ const getUserByEmail = (email, database) => {
           return database[userID]; 
       }
   }
-  console.log("Email does not exist") ;
+  return null;
 };
 
 module.exports = {
