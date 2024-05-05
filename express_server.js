@@ -5,12 +5,13 @@ const PORT = 8080; // default port 8080
 app.set("view engine", "ejs");
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
+
+
+const cookieSession = require('cookie-session')
 app.use(cookieSession({
   name: 'session',
   keys: ['key1', 'key2']
 }));
-
-const cookieSession = require('cookie-session')
 const bcrypt = require("bcryptjs");
 
 const {randomNumberGenerator, getUserByEmail} = require('./helpers')
@@ -18,54 +19,55 @@ const {users, urlDatabase} = require('./databases');
 
 
 app.get("/", (req, res) => {
-  res.redirect("login");
+  const user = req.session.user_id;
+  if (user) {   
+    return res.redirect("/login");
+  }
+  return res.redirect("/urls"); 
 });
 
-//GET
 //Main page
-app.get("/urls", (req, res) => {
-  const userId = req.session.user_id;
-  if (!userId) {
-    return res.status(401).send('Log in to enter');
-  }
-
-  const user = users[userId];
-
-
-  const templateVars = { urls: urlDatabase, user, userID:userId }; 
-  res.render("urls_index", templateVars);
-});;
 
 //New URL
 app.get("/urls/new", (req, res) => {
   const userId = req.session.user_id;
-  //check if user is logged in
+  // Check if user is logged in
   if (!userId) {
-    return res.status(401).send('You must be logged in to access this page.');
+    return res.status(302).redirect('/login');
   }
  
-  const templateVars = {userID:userId }; 
+  const templateVars = { userID: userId }; 
   res.render("urls_new", templateVars);
 });
 
 //Url Individual Page
 app.get("/urls/:id", (req, res) => {
-  const userId = req.session.user_id;
-  const shortenURL = req.params.id; 
+  const shortenURL = req.params.id;
   const longURL = urlDatabase[shortenURL];
-  const user = users[userId];
-
-  if(!userId){
-    res.redirect(longURL)
+  
+  if (!longURL) {
+    return res.status(404).send('URL not found');
   }
 
-  const templateVars ={ longURL: longURL, id: shortenURL, user, userID: userId }
+  const userId = req.session.user_id;
+  const user = users[userId];
 
-  res.render("urls_show", templateVars)
+  // Check if user is logged in
+  if (!userId) {
+    return res.status(403).send('Unauthorized access');
+  }
+
+  const templateVars = { longURL: longURL, id: shortenURL, user, userID: userId };
+  res.render("urls_show", templateVars);
 });
 
 //login page
 app.get("/login", (req, res) => {
+  const user = req.session.user_id;
+  if (user) {   
+    return res.redirect("/urls");
+  }
+
   const templateVars = { req: req}
   res.render("login", templateVars);
 });
@@ -123,6 +125,20 @@ res.redirect("/login");
 
 
 //create new URL
+
+app.get("/urls", (req, res) => {
+  const userId = req.session.user_id;
+  if (!userId) {
+    return res.status(401).redirect("/login");
+  }
+
+  const user = users[userId];
+
+
+  const templateVars = { urls: urlDatabase, user, userID:userId }; 
+  res.render("urls_index", templateVars);
+});
+
 app.post("/urls", (req, res) => {
   const userId = req.session.user_id;
   //check if user is logged in
@@ -148,20 +164,25 @@ app.post("/urls/:id/delete", (req, res) => {
 })
 
 //logout
-app.get("/logout", (rq, res) => {
-  res.redirect('/login')
-})
-
-app.post("/logout", (req, res) => {
-  req.session = null; 
-  res.redirect("/login");
+app.get("/logout", (req, res) => {
+  req.session = null; // Clear session
+  res.clearCookie('session'); // Clear session cookie
+  res.redirect('/login'); // Redirect to login page
 });
 
 //Short URL and update
 app.post("/urls/:id", (req, res) => {
-  const shortURL = req.params.id;
-  const newLongURL = req.body.longURL; 
+  const shortenURL = req.params.id;
+  const longURL = urlDatabase[shortenURL];
   
+  if (!longURL) {
+    return res.status(404).send('URL not found');
+  }
+
+  // Redirect to the longURL if user is not logged in
+  if (!req.session.user_id) {
+    return res.redirect(longURL);
+  }
   urlDatabase[shortURL] = newLongURL;
   
   res.redirect(`/urls`);
@@ -169,6 +190,7 @@ app.post("/urls/:id", (req, res) => {
 
 //LISTEN
 
-app.listen(PORT, () => {
+app.listen(8080, () => {
   console.log(`Example app listening on port ${PORT}!`);
 });
+module.exports = app;
