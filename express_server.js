@@ -6,6 +6,7 @@ app.set("view engine", "ejs");
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
+
 const cookieSession = require('cookie-session');
 app.use(cookieSession({
   name: 'session',
@@ -13,7 +14,7 @@ app.use(cookieSession({
 }));
 const bcrypt = require("bcryptjs");
 
-const {randomNumberGenerator, getUserByEmail} = require('./helpers');
+const {randomNumberGenerator, getUserByEmail, urlsForUser} = require('./helpers');
 const {users, urlDatabase} = require('./databases');
 
 
@@ -34,8 +35,8 @@ app.get("/urls/new", (req, res) => {
   if (!userId) {
     return res.status(302).redirect('/login');
   }
- 
-  const templateVars = { userID: userId };
+  const user = users[userId]; // Fetch user information based on userId
+  const templateVars = { user: user }; // Pass user information to the view
   res.render("urls_new", templateVars);
 });
 
