@@ -1,7 +1,14 @@
 const urlDatabase = {
-  b2xVn2: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
-  s9m5xK: "http://www.google.com"
+  b6UTxQ: {
+    longURL: "https://www.tsn.ca",
+    userID: "aJ48lW",
+  },
+  i3BoGr: {
+    longURL: "https://www.google.ca",
+    userID: "aJ48lW",
+  },
 };
+
 
 const users = {};
 
