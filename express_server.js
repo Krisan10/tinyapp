@@ -19,12 +19,42 @@ const {users, urlDatabase} = require('./databases');
 app.get("/", (req, res) => {
   const user = req.session.user_id;
   if (user) {
-    return res.redirect("/login");
+    return res.redirect("/urls");
   }
-  return res.redirect("/urls");
+  return res.redirect("/login");
 });
 
 //Main page
+//create new URL
+app.get("/urls", (req, res) => {
+  const userId = req.session.user_id;
+  if (!userId) {
+    return res.status(401).send("You do not have permission to access this page.");
+  }
+
+  const user = users[userId];
+  const userUrls = urlsForUser(userId, urlDatabase); // Get URLs specific to the user
+
+  const templateVars = { urls: userUrls, user, userID:userId };
+  res.render("urls_index", templateVars);
+});
+
+app.post("/urls", (req, res) => {
+  const userId = req.session.user_id;
+  //check if user is logged in
+  if (!userId) {
+    return res.status(401).send('You must be logged in to access this page.');
+  }
+
+  const shortURL = randomNumberGenerator();
+  const longURL = req.body.longURL;
+
+  // Store the longURL and userID in the urlDatabase
+  urlDatabase[shortURL] = { longURL, userID: userId };
+  
+  res.redirect(`/urls`);
+});
+
 
 //New URL
 app.get("/urls/new", (req, res) => {
@@ -57,6 +87,19 @@ app.get("/urls/:id", (req, res) => {
 
   const templateVars = { longURL: urlData.longURL, id: shortenURL, user, userID: userId };
   res.render("urls_show", templateVars);
+});
+
+// Redirect short URL to long URL
+app.get("/u/:shortURL", (req, res) => {
+  const shortURL = req.params.shortURL;
+  const urlData = urlDatabase[shortURL];
+
+  if (!urlData) {
+    return res.status(404).send('URL not found');
+  }
+
+  const longURL = urlData.longURL;
+  res.redirect(longURL);
 });
 
 //login page
@@ -120,38 +163,6 @@ app.post("/register", (req, res) => {
   req.session.user_id = userID;
 
   res.redirect("/login");
-});
-
-
-//create new URL
-
-app.get("/urls", (req, res) => {
-  const userId = req.session.user_id;
-  if (!userId) {
-    return res.status(401).redirect("/login");
-  }
-
-  const user = users[userId];
-  const userUrls = urlsForUser(userId, urlDatabase); // Get URLs specific to the user
-
-  const templateVars = { urls: userUrls, user, userID:userId };
-  res.render("urls_index", templateVars);
-});
-
-app.post("/urls", (req, res) => {
-  const userId = req.session.user_id;
-  //check if user is logged in
-  if (!userId) {
-    return res.status(401).send('You must be logged in to access this page.');
-  }
-
-  const shortURL = randomNumberGenerator();
-  const longURL = req.body.longURL;
-
-  // Store the longURL and userID in the urlDatabase
-  urlDatabase[shortURL] = { longURL, userID: userId };
-  
-  res.redirect(`/urls`);
 });
 
 //delete
