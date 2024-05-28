@@ -6,7 +6,6 @@ app.set("view engine", "ejs");
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
-
 const cookieSession = require('cookie-session');
 app.use(cookieSession({
   name: 'session',
@@ -16,7 +15,6 @@ const bcrypt = require("bcryptjs");
 
 const {randomNumberGenerator, getUserByEmail, urlsForUser} = require('./helpers');
 const {users, urlDatabase} = require('./databases');
-
 
 app.get("/", (req, res) => {
   const user = req.session.user_id;
@@ -43,21 +41,21 @@ app.get("/urls/new", (req, res) => {
 //Url Individual Page
 app.get("/urls/:id", (req, res) => {
   const shortenURL = req.params.id;
-  const longURL = urlDatabase[shortenURL];
+  const urlData = urlDatabase[shortenURL];
   
-  if (!longURL) {
+  if (!urlData) {
     return res.status(404).send('URL not found');
   }
 
   const userId = req.session.user_id;
   const user = users[userId];
 
-  // Check if user is logged in
-  if (!userId) {
+  // Check if user is logged in and is the owner of the URL
+  if (!userId || urlData.userID !== userId) {
     return res.status(403).send('Unauthorized access');
   }
 
-  const templateVars = { longURL: longURL, id: shortenURL, user, userID: userId };
+  const templateVars = { longURL: urlData.longURL, id: shortenURL, user, userID: userId };
   res.render("urls_show", templateVars);
 });
 
@@ -134,9 +132,9 @@ app.get("/urls", (req, res) => {
   }
 
   const user = users[userId];
+  const userUrls = urlsForUser(userId, urlDatabase); // Get URLs specific to the user
 
-
-  const templateVars = { urls: urlDatabase, user, userID:userId };
+  const templateVars = { urls: userUrls, user, userID:userId };
   res.render("urls_index", templateVars);
 });
 
@@ -150,8 +148,8 @@ app.post("/urls", (req, res) => {
   const shortURL = randomNumberGenerator();
   const longURL = req.body.longURL;
 
-  // This stores the longURL into the urlDatabase as a value for the shortURL
-  urlDatabase[shortURL] = longURL;
+  // Store the longURL and userID in the urlDatabase
+  urlDatabase[shortURL] = { longURL, userID: userId };
   
   res.redirect(`/urls`);
 });
@@ -159,6 +157,12 @@ app.post("/urls", (req, res) => {
 //delete
 app.post("/urls/:id/delete", (req, res) => {
   const shortURL = req.params.id;
+  const userId = req.session.user_id;
+
+  // Check if URL exists and if the logged-in user is the owner
+  if (!urlDatabase[shortURL] || urlDatabase[shortURL].userID !== userId) {
+    return res.status(403).send('Unauthorized access');
+  }
 
   delete urlDatabase[shortURL];
   res.redirect('/urls');
@@ -174,24 +178,25 @@ app.get("/logout", (req, res) => {
 //Short URL and update
 app.post("/urls/:id", (req, res) => {
   const shortenURL = req.params.id;
-  const longURL = urlDatabase[shortenURL];
+  const urlData = urlDatabase[shortenURL];
   
-  if (!longURL) {
+  if (!urlData) {
     return res.status(404).send('URL not found');
   }
 
-  // Redirect to the longURL if user is not logged in
-  if (!req.session.user_id) {
-    return res.redirect(longURL);
+  const userId = req.session.user_id;
+  
+  // Check if the logged-in user is the owner of the URL
+  if (urlData.userID !== userId) {
+    return res.status(403).send('Unauthorized access');
   }
 
   const newLongURL = req.body.longURL; // Corrected variable name
 
   // Update the long URL associated with the short URL in the database
-  urlDatabase[shortenURL] = newLongURL;
+  urlDatabase[shortenURL].longURL = newLongURL;
   
   // Pass the user information to the header partial
-  const userId = req.session.user_id;
   const user = users[userId];
   const templateVars = { user, userID: userId };
 
@@ -204,7 +209,6 @@ app.post("/urls/:id", (req, res) => {
     res.redirect(`/urls`);
   });
 });
-
 
 //LISTEN
 
