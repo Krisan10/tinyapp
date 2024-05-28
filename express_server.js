@@ -6,7 +6,6 @@ app.set("view engine", "ejs");
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
-
 const cookieSession = require('cookie-session');
 app.use(cookieSession({
   name: 'session',
@@ -83,6 +82,7 @@ app.post("/login", (req, res) => {
     res.status(403).send("Username and/or password does not match");
   } else {
     req.session.user_id = oldUser.id;
+    const user = { email: oldUser.email }; // Ensure that user object includes email
     res.redirect("/urls");
   }
 });
@@ -183,10 +183,27 @@ app.post("/urls/:id", (req, res) => {
   if (!req.session.user_id) {
     return res.redirect(longURL);
   }
-  urlDatabase[shortURL] = newLongURL;
+
+  const newLongURL = req.body.longURL; // Corrected variable name
+
+  // Update the long URL associated with the short URL in the database
+  urlDatabase[shortenURL] = newLongURL;
   
-  res.redirect(`/urls`);
+  // Pass the user information to the header partial
+  const userId = req.session.user_id;
+  const user = users[userId];
+  const templateVars = { user, userID: userId };
+
+  // Render the header and then redirect to the URLs page
+  res.render("header", templateVars, (err, headerHTML) => {
+    if (err) {
+      // Handle error
+    }
+    // Redirect to the URLs page
+    res.redirect(`/urls`);
+  });
 });
+
 
 //LISTEN
 
